@@ -14,13 +14,20 @@ namespace DevUpTweet
         static void Main(string[] args)
         {
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-            //TODO: replace these keys
+            //load a variety of settings to be used later, these come from a user settings file, and will be blank by default
             var consumerKey = Settings1.Default["consumerKey"].ToString();
             var consumerSecret = Settings1.Default["consumerSecret"].ToString();
+            var session = OAuth.Authorize(consumerKey, consumerSecret);
+            var accessToken = Settings1.Default["accessToken"].ToString();
+            var accessSecret = Settings1.Default["accessSecret"].ToString();
+            long userID = (long)Settings1.Default["userID"];
+            var screenName = Settings1.Default["screenName"].ToString();
+            var strLastTweetSentTime = Settings1.Default["lastTweetSentTime"].ToString();
 
-            //if we don't have these stores yet, get them from the console
+            //if we don't have these stores yet, get them from the console, these are stored in a user settings file for subsequent calls
             if (consumerKey == string.Empty || consumerSecret == string.Empty)
             {
+                //we need to get these from our application in twitter
                 Console.WriteLine("Enter your consumerKey:");
                 consumerKey = Console.ReadLine();
 
@@ -30,17 +37,9 @@ namespace DevUpTweet
             }
 
 
-            var session = OAuth.Authorize(consumerKey, consumerSecret);
-            //Properties.Settings1.Default.Reset();
-            //read from the local settings to see if we already have the authentication.
-            var accessToken = Settings1.Default["accessToken"].ToString();
-            var accessSecret = Settings1.Default["accessSecret"].ToString();
-            long userID = (long)Settings1.Default["userID"];
-            var screenName = Settings1.Default["screenName"].ToString();
-            var strLastTweetSentTime = Settings1.Default["lastTweetSentTime"].ToString();
-
 
             Tokens tokens = new Tokens();
+
 
             if (consumerKey != string.Empty && consumerSecret != string.Empty && accessToken != string.Empty && accessSecret != string.Empty)
             {
@@ -50,12 +49,14 @@ namespace DevUpTweet
             }
             else
             {
+                //If we don't have these settings populated already we need to go authenticate the user with twitter and get a pin code
                 //need to authenticate, and then get a pin code from Twitter to store/use
-                System.Diagnostics.Process.Start(session.AuthorizeUri.AbsoluteUri);
+                System.Diagnostics.Process.Start(session.AuthorizeUri.AbsoluteUri); //this will open up a URL for the user to login/authorize the app
                 Console.WriteLine("@DevUpBot Enter the Pin code from Twitter");
                 string pin = Console.ReadLine();
+
                 tokens = session.GetTokens(pin);
-                //save the token values
+                //save the token values to our settings
                 Settings1.Default["consumerKey"] = tokens.ConsumerKey;
                 Settings1.Default["consumerSecret"] = tokens.ConsumerSecret;
                 Settings1.Default["accessToken"] = tokens.AccessToken;
@@ -65,8 +66,7 @@ namespace DevUpTweet
                 Settings1.Default.Save();
             }
 
-            //TODO: now let's look at getting the bot doing something
-
+            //now let's look at getting the bot doing something
             Console.WriteLine("Tweet History:");
 
             //we don't want to retweet or reply to tweets that we've already touched, so we do that by keeping track of our last time
@@ -83,49 +83,71 @@ namespace DevUpTweet
             }
 
             long lastTweetId = (long)Settings1.Default["lastTweetId"]; // 921273009989672960;
-            
 
-            //This is where you need to start being careful of how often you do things
-            if (DateTime.Now >= lastTweetTime.AddMinutes(1))
+            //This is where you need to start being careful of how often you do things, don't abuse! This thing will run until you kill the console app with Control-C
+            do
             {
-                //list of strings to add to the replies
-                var listYes = new List<string> { "@{0} enjoy the conference!", "@{0} will you have fun?", "@{0} what do you think you will like best?", "@{0} is this your first #DevUpConf?"
+                try
+                {
+                    //check every minute to see if there is something new
+                    if (DateTime.Now >= lastTweetTime.AddMinutes(1))
+                    {
+                        //list of strings to add to the replies
+                        var listYes = new List<string> { "@{0} enjoy the conference!", "@{0} will you have fun?", "@{0} what do you think you will like best?", "@{0} is this your first #DevUpConf?"
                     , "@{0} have fun!"
                 };
 
-                int index = new Random().Next(listYes.Count);
-                var status = listYes[index];
-                
-                var res = tokens.Search.Tweets("\"devup2019\" -kill -death -suicide -shoot -stab -kms -die -jump", null, null, null, null, null, null, lastTweetId, null, null, null, null);
-                foreach (Status r in res.OrderBy(x => x.Id))
-                {
-                    //Check to make sure we don't reply to a previously replied tweet, or to ourselves
-                    //TODO: change screenname == christoc to != devupbot before conference
-                    if (r.Id != lastTweetId && r.User.ScreenName == "christoc" && r.RetweetedStatus == null)
-                    {
-                        lastTweetId = r.Id;
-                        Settings1.Default["lastTweetId"] = lastTweetId;
-                        Settings1.Default.Save();
-                        status = string.Format(status, r.User.ScreenName);
-                        Status s = tokens.Statuses.Update(
-                            status: status
-                            , in_reply_to_status_id: lastTweetId
-                        );
+                        int index = new Random().Next(listYes.Count);
+                        var status = listYes[index]; //randomize what text to use as a reply
 
-                        break;
+                        //look for tweets with devup2019 in the body, but ignore any that have some bad keywords in them
+                        var res = tokens.Search.Tweets("\"devup2019\" -kill -death -suicide -shoot -stab -kms -die -jump", null, null, null, null, null, null, lastTweetId, null, null, null, null);
+                        foreach (Status r in res.OrderBy(x => x.Id))
+                        {
+                            //Check to make sure we don't reply to a previously replied tweet, or to ourselves
+                            //TODO: change screenname == christoc to != devupbot before conference
+                            if (r.Id != lastTweetId && r.User.ScreenName == "christoc" && r.RetweetedStatus == null)
+                            {
+                                lastTweetId = r.Id;
+                                Settings1.Default["lastTweetId"] = lastTweetId;
+                                Settings1.Default.Save();
+                                status = string.Format(status, r.User.ScreenName);
+                                Status s = tokens.Statuses.Update(
+                                    status: status
+                                    , in_reply_to_status_id: lastTweetId
+                                );
+
+                                Console.WriteLine("Replies to tweet from:" + r.User.ScreenName);
+
+                                break;
+                            }
+                        }
+
+
+                        lastTweetTime = DateTime.Now;
+                        Settings1.Default["lastTweetTime"] = lastTweetTime.ToString();
+                        Settings1.Default.Save();
+                        Console.WriteLine(lastTweetTime.ToString());
+
+                        //TODO: let's look at retweeting #devupconf posts
+
+
+
+
                     }
                 }
+                catch (Exception ex)
+                {
+                    //if there was an error, write it to the screen, save the last tweet time and continue the do/while so that app doesn't completely crash.
+                    Console.WriteLine(ex.InnerException);
+                    lastTweetTime = DateTime.Now;
+                    Settings1.Default["lastTweetTime"] = lastTweetTime.ToString();
+                    Settings1.Default.Save();
 
+                    Console.WriteLine("Error at:" + lastTweetTime.ToString());
+                }
+            } while (true);
 
-                lastTweetTime = DateTime.Now;
-                Settings1.Default["lastTweetTime"] = lastTweetTime.ToString();
-                Settings1.Default.Save();
-
-                Console.WriteLine(lastTweetTime.ToString());
-
-                //TODO: let's look at retweeting #devupconf posts
-            }
-            
         }
     }
 }
