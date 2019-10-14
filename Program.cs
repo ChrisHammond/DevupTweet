@@ -121,7 +121,6 @@ namespace DevUpTweet
                         foreach (Status r in res.OrderBy(x => x.Id))
                         {
                             //Check to make sure we don't reply to a previously replied tweet, or to ourselves
-                            //TODO: change screenname == christoc to != devupbot before conference
                             if (r.Id != lastTweetId && r.User.ScreenName.ToLower() != "devupbot" && r.RetweetedStatus == null)
                             {
                                 lastTweetId = r.Id;
@@ -150,13 +149,12 @@ namespace DevUpTweet
                         foreach (Status r in res.OrderBy(x => x.Id))
                         {
                             //Check to make sure we don't reply to a previously replied tweet, or to ourselves
-                            //TODO: change screenname == christoc to != devupbot before conference
                             if (r.Id != lastRetweetId && r.User.ScreenName.ToLower() != "devupbot" && r.RetweetedStatus == null)
                             {
                                 lastRetweetId = r.Id;
                                 Settings1.Default["lastRetweetId"] = lastRetweetId;
                                 Settings1.Default.Save();
-                                status = string.Format(status, r.User.ScreenName);
+                                //status = string.Format(status, r.User.ScreenName);
 
                                 Status rt = tokens.Statuses.Retweet(r.Id,false,false);
 
