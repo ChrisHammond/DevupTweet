@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using CoreTweet;
 using DevUpTweet.Properties;
 
@@ -20,9 +18,8 @@ namespace DevUpTweet
             var session = OAuth.Authorize(consumerKey, consumerSecret);
             var accessToken = Settings1.Default["accessToken"].ToString();
             var accessSecret = Settings1.Default["accessSecret"].ToString();
-            long userID = (long)Settings1.Default["userID"];
+            long userId = (long)Settings1.Default["userID"];
             var screenName = Settings1.Default["screenName"].ToString();
-            var strLastTweetSentTime = Settings1.Default["lastTweetSentTime"].ToString();
 
             //if we don't have these stores yet, get them from the console, these are stored in a user settings file for subsequent calls
             if (consumerKey == string.Empty || consumerSecret == string.Empty)
@@ -33,7 +30,6 @@ namespace DevUpTweet
 
                 Console.WriteLine("Enter your consumerSecret:");
                 consumerSecret = Console.ReadLine();
-
             }
 
 
@@ -45,7 +41,7 @@ namespace DevUpTweet
             {
                 //if we already have the settings, let's create the auth token
                 //Create(string consumerKey, string consumerSecret, string accessToken, string accessSecret, long userID = 0, string screenName = null);
-                tokens = Tokens.Create(consumerKey, consumerSecret, accessToken, accessSecret, userID, screenName);
+                tokens = Tokens.Create(consumerKey, consumerSecret, accessToken, accessSecret, userId, screenName);
             }
             else
             {
@@ -71,18 +67,22 @@ namespace DevUpTweet
 
             //we don't want to retweet or reply to tweets that we've already touched, so we do that by keeping track of our last time
             DateTime lastTweetTime = DateTime.Now.AddMinutes(-5);
-            DateTime lastTweetSentTime = DateTime.Now.AddMinutes(-5);
+            DateTime lastRetweetTime = DateTime.Now.AddMinutes(-5);
+
 
             if (Settings1.Default["lastTweetTime"].ToString() != string.Empty)
             {
                 lastTweetTime = Convert.ToDateTime(Settings1.Default["lastTweetTime"]);
             }
-            if (strLastTweetSentTime != string.Empty)
+
+            if (Settings1.Default["lastRetweetTime"].ToString() != string.Empty)
             {
-                lastTweetSentTime = Convert.ToDateTime(strLastTweetSentTime);
+                lastRetweetTime = Convert.ToDateTime(Settings1.Default["lastRetweetTime"]);
             }
 
             long lastTweetId = (long)Settings1.Default["lastTweetId"]; // 921273009989672960;
+
+            long lastRetweetId = (long)Settings1.Default["lastRetweetId"]; // 921273009989672960;
 
             //This is where you need to start being careful of how often you do things, don't abuse! This thing will run until you kill the console app with Control-C
             do
@@ -93,8 +93,8 @@ namespace DevUpTweet
                     if (DateTime.Now >= lastTweetTime.AddMinutes(1))
                     {
                         //list of strings to add to the replies
-                        var listYes = new List<string> { "@{0} enjoy the conference!", "@{0} will you have fun?", "@{0} what do you think you will like best?", "@{0} is this your first #DevUpConf?"
-                    , "@{0} have fun!"
+                        var listYes = new List<string> { "Enjoy the conference @{0}!", "Will you have fun @{0}?", "What do you think you will like best?", "Is this your first #DevUpConf?"
+                    , "@{0} Have fun!"
                 };
 
                         int index = new Random().Next(listYes.Count);
@@ -106,7 +106,7 @@ namespace DevUpTweet
                         {
                             //Check to make sure we don't reply to a previously replied tweet, or to ourselves
                             //TODO: change screenname == christoc to != devupbot before conference
-                            if (r.Id != lastTweetId && r.User.ScreenName == "christoc" && r.RetweetedStatus == null)
+                            if (r.Id != lastTweetId && r.User.ScreenName != "devupbot" && r.RetweetedStatus == null)
                             {
                                 lastTweetId = r.Id;
                                 Settings1.Default["lastTweetId"] = lastTweetId;
@@ -117,22 +117,45 @@ namespace DevUpTweet
                                     , in_reply_to_status_id: lastTweetId
                                 );
 
-                                Console.WriteLine("Replies to tweet from:" + r.User.ScreenName);
+                                Console.WriteLine("Reply to tweet from:" + r.User.ScreenName);
+
+                                break;
+                            }
+                        }
+
+                        //store the last tweet time so we don't reply to that again in the future
+                        lastTweetTime = DateTime.Now;
+                        Settings1.Default["lastTweetTime"] = lastTweetTime.ToString();
+                        Settings1.Default.Save();
+                        Console.WriteLine("Last reply time: " + lastTweetTime.ToString());
+
+                        //let's look at retweeting #devupconf posts
+                        res = tokens.Search.Tweets("\"devup2019\" -kill -death -suicide -shoot -stab -kms -die -jump", null, null, null, null, null, null, lastRetweetId, null, null, null, null);
+                        foreach (Status r in res.OrderBy(x => x.Id))
+                        {
+                            //Check to make sure we don't reply to a previously replied tweet, or to ourselves
+                            //TODO: change screenname == christoc to != devupbot before conference
+                            if (r.Id != lastRetweetId && r.User.ScreenName != "devupbot" && r.RetweetedStatus == null)
+                            {
+                                lastRetweetId = r.Id;
+                                Settings1.Default["lastRetweetId"] = lastRetweetId;
+                                Settings1.Default.Save();
+                                status = string.Format(status, r.User.ScreenName);
+
+                                Status rt = tokens.Statuses.Retweet(r.Id,false,false);
+
+                                Console.WriteLine("Retweet of:" + r.User.ScreenName);
 
                                 break;
                             }
                         }
 
 
-                        lastTweetTime = DateTime.Now;
-                        Settings1.Default["lastTweetTime"] = lastTweetTime.ToString();
+                        lastRetweetTime = DateTime.Now;
+                        Settings1.Default["lastRetweetTime"] = lastRetweetTime.ToString();
                         Settings1.Default.Save();
-                        Console.WriteLine(lastTweetTime.ToString());
-
-                        //TODO: let's look at retweeting #devupconf posts
-
-
-
+                        Console.WriteLine("Last retweet time: " + lastRetweetTime.ToString());
+                        
 
                     }
                 }
@@ -140,6 +163,7 @@ namespace DevUpTweet
                 {
                     //if there was an error, write it to the screen, save the last tweet time and continue the do/while so that app doesn't completely crash.
                     Console.WriteLine(ex.InnerException);
+                    Console.WriteLine(ex.Message);
                     lastTweetTime = DateTime.Now;
                     Settings1.Default["lastTweetTime"] = lastTweetTime.ToString();
                     Settings1.Default.Save();
@@ -147,7 +171,6 @@ namespace DevUpTweet
                     Console.WriteLine("Error at:" + lastTweetTime.ToString());
                 }
             } while (true);
-
         }
     }
 }

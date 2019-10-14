@@ -142,16 +142,5 @@ namespace DevUpTweet.Properties {
                 this["lastRetweetId"] = value;
             }
         }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::System.DateTime lastTweetSentTime {
-            get {
-                return ((global::System.DateTime)(this["lastTweetSentTime"]));
-            }
-            set {
-                this["lastTweetSentTime"] = value;
-            }
-        }
     }
 }
