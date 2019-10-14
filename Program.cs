@@ -12,14 +12,15 @@ namespace DevUpTweet
         static void Main(string[] args)
         {
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-            //load a variety of settings to be used later, these come from a user settings file, and will be blank by default
+            
+            
+            //uncomment this to clear user settings and reauthorize
+            //Properties.Settings1.Default.Reset();
+
+            //load a the twitter application settings to be used later, these come from a user settings file, and will be blank by default
             var consumerKey = Settings1.Default["consumerKey"].ToString();
             var consumerSecret = Settings1.Default["consumerSecret"].ToString();
-            var session = OAuth.Authorize(consumerKey, consumerSecret);
-            var accessToken = Settings1.Default["accessToken"].ToString();
-            var accessSecret = Settings1.Default["accessSecret"].ToString();
-            long userId = (long)Settings1.Default["userID"];
-            var screenName = Settings1.Default["screenName"].ToString();
+            
 
             //if we don't have these stores yet, get them from the console, these are stored in a user settings file for subsequent calls
             if (consumerKey == string.Empty || consumerSecret == string.Empty)
@@ -32,11 +33,15 @@ namespace DevUpTweet
                 consumerSecret = Console.ReadLine();
             }
 
-
-
+            //load the rest of the settings
+            var session = OAuth.Authorize(consumerKey, consumerSecret);
+            var accessToken = Settings1.Default["accessToken"].ToString();
+            var accessSecret = Settings1.Default["accessSecret"].ToString();
+            long userId = (long)Settings1.Default["userID"];
+            var screenName = Settings1.Default["screenName"].ToString();
+            
             Tokens tokens = new Tokens();
-
-
+            
             if (consumerKey != string.Empty && consumerSecret != string.Empty && accessToken != string.Empty && accessSecret != string.Empty)
             {
                 //if we already have the settings, let's create the auth token
