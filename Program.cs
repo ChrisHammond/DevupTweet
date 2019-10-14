@@ -98,18 +98,18 @@ namespace DevUpTweet
                     if (DateTime.Now >= lastTweetTime.AddMinutes(1))
                     {
                         //list of strings to add to the replies
-                        var listYes = new List<string> { "Enjoy the conference @{0}!", "Will you have fun @{0}?"
-                            , "What do you think you will like best?"
-                            , "Is this your first #DevUp2019?"
-                            , "Are you excited about any particular session #DevUp2019?"
-                            , "Don't have too much fun! #DevUp2019?"
-                            , "Are you going to see @christoc's sessions? #DevUp2019"
-                            , "Are you #ReadyDeveloperOne?"
-                            , "Enjoy St. Charles! #DevUp2019"
-                            , "Do you remember when it was called Day of .Net? How about Days? #DevUp2019"
-                            , "Don't forget about the new entrance in parking garage on Level 3 #DevUp2019"
-                            , "The Keynote on Tuesday is at 8am #DevUp2019"
-                            , "The closing keynote on Wednesday is at 3:45pm #DevUp2019"
+                        var listYes = new List<string> { "@{0} Enjoy the conference", "@{0} Will you have fun?"
+                            , "@{0} What do you think you will like best?"
+                            , "@{0} Is this your first #DevUp2019?"
+                            , "@{0} Are you excited about any particular session #DevUp2019?"
+                            , "@{0} Don't have too much fun! #DevUp2019?"
+                            , "@{0} Are you going to see @christoc's sessions? #DevUp2019"
+                            , "@{0} Are you #ReadyDeveloperOne?"
+                            , "@{0} Enjoy St. Charles! #DevUp2019"
+                            , "@{0} Do you remember when it was called Day of .Net? How about Days? #DevUp2019"
+                            , "@{0} Don't forget about the new entrance in parking garage on Level 3 #DevUp2019"
+                            , "@{0} The Keynote on Tuesday is at 8am #DevUp2019"
+                            , "@{0} The closing keynote on Wednesday is at 3:45pm #DevUp2019"
                             , "@{0} Have fun!"
                 };
 
@@ -134,7 +134,7 @@ namespace DevUpTweet
 
                                 Console.WriteLine("Reply to tweet from:" + r.User.ScreenName);
 
-                                break;
+                               //break;
                             }
                         }
 
@@ -160,7 +160,7 @@ namespace DevUpTweet
 
                                 Console.WriteLine("Retweet of:" + r.User.ScreenName);
 
-                                break;
+                               // break;
                             }
                         }
 
@@ -180,6 +180,9 @@ namespace DevUpTweet
                     Console.WriteLine(ex.Message);
                     lastTweetTime = DateTime.Now;
                     Settings1.Default["lastTweetTime"] = lastTweetTime.ToString();
+                    Settings1.Default.Save();
+                    //update the last retweet time too just to be safe 
+                    Settings1.Default["lastRetweetTime"] = lastTweetTime.ToString();
                     Settings1.Default.Save();
 
                     Console.WriteLine("Error at:" + lastTweetTime.ToString());
