@@ -98,8 +98,19 @@ namespace DevUpTweet
                     if (DateTime.Now >= lastTweetTime.AddMinutes(1))
                     {
                         //list of strings to add to the replies
-                        var listYes = new List<string> { "Enjoy the conference @{0}!", "Will you have fun @{0}?", "What do you think you will like best?", "Is this your first #DevUpConf?"
-                    , "@{0} Have fun!"
+                        var listYes = new List<string> { "Enjoy the conference @{0}!", "Will you have fun @{0}?"
+                            , "What do you think you will like best?"
+                            , "Is this your first #DevUp2019?"
+                            , "Are you excited about any particular session #DevUp2019?"
+                            , "Don't have too much fun! #DevUp2019?"
+                            , "Are you going to see @christoc's sessions? #DevUp2019"
+                            , "Are you #ReadyDeveloperOne?"
+                            , "Enjoy St. Charles! #DevUp2019"
+                            , "Do you remember when it was called Day of .Net? How about Days? #DevUp2019"
+                            , "Don't forget about the new entrance in parking garage on Level 3 #DevUp2019"
+                            , "The Keynote on Tuesday is at 8am #DevUp2019"
+                            , "The closing keynote on Wednesday is at 3:45pm #DevUp2019"
+                            , "@{0} Have fun!"
                 };
 
                         int index = new Random().Next(listYes.Count);
@@ -111,7 +122,7 @@ namespace DevUpTweet
                         {
                             //Check to make sure we don't reply to a previously replied tweet, or to ourselves
                             //TODO: change screenname == christoc to != devupbot before conference
-                            if (r.Id != lastTweetId && r.User.ScreenName != "devupbot" && r.RetweetedStatus == null)
+                            if (r.Id != lastTweetId && r.User.ScreenName.ToLower() != "devupbot" && r.RetweetedStatus == null)
                             {
                                 lastTweetId = r.Id;
                                 Settings1.Default["lastTweetId"] = lastTweetId;
@@ -134,13 +145,13 @@ namespace DevUpTweet
                         Settings1.Default.Save();
                         Console.WriteLine("Last reply time: " + lastTweetTime.ToString());
 
-                        //let's look at retweeting #devupconf posts
+                        //let's look at retweeting #DevUp2019 posts
                         res = tokens.Search.Tweets("\"devup2019\" -kill -death -suicide -shoot -stab -kms -die -jump", null, null, null, null, null, null, lastRetweetId, null, null, null, null);
                         foreach (Status r in res.OrderBy(x => x.Id))
                         {
                             //Check to make sure we don't reply to a previously replied tweet, or to ourselves
                             //TODO: change screenname == christoc to != devupbot before conference
-                            if (r.Id != lastRetweetId && r.User.ScreenName != "devupbot" && r.RetweetedStatus == null)
+                            if (r.Id != lastRetweetId && r.User.ScreenName.ToLower() != "devupbot" && r.RetweetedStatus == null)
                             {
                                 lastRetweetId = r.Id;
                                 Settings1.Default["lastRetweetId"] = lastRetweetId;
