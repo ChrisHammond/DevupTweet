@@ -40,7 +40,7 @@ namespace DevUpTweet
             long userId = (long)Settings1.Default["userID"];
             var screenName = Settings1.Default["screenName"].ToString();
 
-            Tokens tokens = new Tokens();
+            Tokens tokens;
 
             if (consumerKey != string.Empty && consumerSecret != string.Empty && accessToken != string.Empty && accessSecret != string.Empty)
             {
@@ -135,7 +135,7 @@ namespace DevUpTweet
                                 Settings1.Default["lastTweetId"] = lastTweetId;
                                 Settings1.Default.Save();
                                 status = string.Format(status, r.User.ScreenName);
-                                Status s = tokens.Statuses.Update(
+                                tokens.Statuses.Update(
                                     status: status
                                     , in_reply_to_status_id: lastTweetId
                                 );
@@ -158,7 +158,7 @@ namespace DevUpTweet
                                 Settings1.Default["lastBadTagId"] = lastBadTagId;
                                 Settings1.Default.Save();
                                 tweetText = string.Format(tweetText, r.User.ScreenName);
-                                Status s = tokens.Statuses.Update(
+                                tokens.Statuses.Update(
                                     status: tweetText
                                     , in_reply_to_status_id: lastBadTagId
                                 );
@@ -173,7 +173,7 @@ namespace DevUpTweet
                         lastTweetTime = DateTime.Now;
                         Settings1.Default["lastTweetTime"] = lastTweetTime.ToString();
                         Settings1.Default.Save();
-                        Console.WriteLine("Last reply time: " + lastTweetTime.ToString());
+                        Console.WriteLine("Last reply time: " + lastTweetTime);
 
                         //let's look at retweeting #DevUp2019 posts
                         res = tokens.Search.Tweets("\"devup2019\" -kill -death -suicide -shoot -stab -kms -die -jump", null, null, null, null, null, null, lastRetweetId, null, null, null, null);
@@ -187,7 +187,7 @@ namespace DevUpTweet
                                 Settings1.Default.Save();
                                 //status = string.Format(status, r.User.ScreenName);
 
-                                Status rt = tokens.Statuses.Retweet(r.Id, false, false);
+                                tokens.Statuses.Retweet(r.Id, false, false);
 
                                 Console.WriteLine("Retweet of:" + r.User.ScreenName);
 
@@ -199,7 +199,7 @@ namespace DevUpTweet
                         lastRetweetTime = DateTime.Now;
                         Settings1.Default["lastRetweetTime"] = lastRetweetTime.ToString();
                         Settings1.Default.Save();
-                        Console.WriteLine("Last retweet time: " + lastRetweetTime.ToString());
+                        Console.WriteLine("Last retweet time: " + lastRetweetTime);
                     }
                 }
                 catch (Exception ex)
@@ -214,7 +214,7 @@ namespace DevUpTweet
                     Settings1.Default["lastRetweetTime"] = lastTweetTime.ToString();
                     Settings1.Default.Save();
 
-                    Console.WriteLine("Error at:" + lastTweetTime.ToString());
+                    Console.WriteLine("Error at:" + lastTweetTime);
                 }
             } while (true);
         }
