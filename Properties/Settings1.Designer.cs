@@ -142,5 +142,17 @@ namespace DevUpTweet.Properties {
                 this["lastRetweetId"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public long lastBadTagId {
+            get {
+                return ((long)(this["lastBadTagId"]));
+            }
+            set {
+                this["lastBadTagId"] = value;
+            }
+        }
     }
 }

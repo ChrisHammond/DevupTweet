@@ -12,15 +12,15 @@ namespace DevUpTweet
         static void Main(string[] args)
         {
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-            
-            
+
+
             //uncomment this to clear user settings and reauthorize
             //Properties.Settings1.Default.Reset();
 
             //load a the twitter application settings to be used later, these come from a user settings file, and will be blank by default
             var consumerKey = Settings1.Default["consumerKey"].ToString();
             var consumerSecret = Settings1.Default["consumerSecret"].ToString();
-            
+
 
             //if we don't have these stores yet, get them from the console, these are stored in a user settings file for subsequent calls
             if (consumerKey == string.Empty || consumerSecret == string.Empty)
@@ -39,9 +39,9 @@ namespace DevUpTweet
             var accessSecret = Settings1.Default["accessSecret"].ToString();
             long userId = (long)Settings1.Default["userID"];
             var screenName = Settings1.Default["screenName"].ToString();
-            
+
             Tokens tokens = new Tokens();
-            
+
             if (consumerKey != string.Empty && consumerSecret != string.Empty && accessToken != string.Empty && accessSecret != string.Empty)
             {
                 //if we already have the settings, let's create the auth token
@@ -89,6 +89,9 @@ namespace DevUpTweet
 
             long lastRetweetId = (long)Settings1.Default["lastRetweetId"]; // 921273009989672960;
 
+            long lastBadTagId = (long)Settings1.Default["lastBadTagId"]; // 921273009989672960;
+            
+
             //This is where you need to start being careful of how often you do things, don't abuse! This thing will run until you kill the console app with Control-C
             do
             {
@@ -127,7 +130,7 @@ namespace DevUpTweet
 
                                 index = new Random().Next(listYes.Count);
                                 status = listYes[index]; //randomize what text to use as a reply
-                                
+
                                 lastTweetId = r.Id;
                                 Settings1.Default["lastTweetId"] = lastTweetId;
                                 Settings1.Default.Save();
@@ -139,7 +142,30 @@ namespace DevUpTweet
 
                                 Console.WriteLine("Reply to tweet from:" + r.User.ScreenName);
 
-                               //break;
+                                //break;
+                            }
+                        }
+
+                        //call our the wrong hashtag
+                        var resTag = tokens.Search.Tweets("\"#devupconf\" -kill -death -suicide -shoot -stab -kms -die -jump", null, null, null, null, null, null, lastBadTagId, null, null, null, null);
+                        foreach (Status r in resTag.OrderBy(x => x.Id))
+                        {
+                            //Check to make sure we don't reply to a previously replied tweet, or to ourselves
+                            if (r.Id != lastBadTagId && r.User.ScreenName.ToLower() != "devupbot" && r.RetweetedStatus == null)
+                            {
+                                var tweetText = "@{0} You might try the #DevUp2019 tag instead!";
+                                lastBadTagId = r.Id;
+                                Settings1.Default["lastBadTagId"] = lastBadTagId;
+                                Settings1.Default.Save();
+                                tweetText = string.Format(tweetText, r.User.ScreenName);
+                                Status s = tokens.Statuses.Update(
+                                    status: tweetText
+                                    , in_reply_to_status_id: lastBadTagId
+                                );
+
+                                Console.WriteLine("Reply to tweet from:" + r.User.ScreenName);
+
+                                //break;
                             }
                         }
 
@@ -161,11 +187,11 @@ namespace DevUpTweet
                                 Settings1.Default.Save();
                                 //status = string.Format(status, r.User.ScreenName);
 
-                                Status rt = tokens.Statuses.Retweet(r.Id,false,false);
+                                Status rt = tokens.Statuses.Retweet(r.Id, false, false);
 
                                 Console.WriteLine("Retweet of:" + r.User.ScreenName);
 
-                               // break;
+                                // break;
                             }
                         }
 
