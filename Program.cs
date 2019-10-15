@@ -32,7 +32,6 @@ namespace DevUpTweet
                 Console.WriteLine("Enter your consumerSecret:");
                 consumerSecret = Console.ReadLine();
             }
-
             //load the rest of the settings
             var session = OAuth.Authorize(consumerKey, consumerSecret);
             var accessToken = Settings1.Default["accessToken"].ToString();
@@ -90,7 +89,7 @@ namespace DevUpTweet
             long lastRetweetId = (long)Settings1.Default["lastRetweetId"]; // 921273009989672960;
 
             long lastBadTagId = (long)Settings1.Default["lastBadTagId"]; // 921273009989672960;
-            
+
 
             //This is where you need to start being careful of how often you do things, don't abuse! This thing will run until you kill the console app with Control-C
             do
@@ -114,6 +113,9 @@ namespace DevUpTweet
                             //, "@{0} The Keynote on Tuesday is at 8am #DevUp2019"
                             , "@{0} The closing keynote on Wednesday is at 3:45pm #DevUp2019"
                             , "@{0} what did you think of @donasarkar's keynote?"
+                            , "@{0} you can learn more about me at 1pm Wednesday in the Success room #FTW #DevUp2019"
+
+                            , "@{0} I've got less than 2 days left before I'm shut down!"
                             , "@{0} Have fun!"
                 };
 
@@ -163,7 +165,7 @@ namespace DevUpTweet
                                     , in_reply_to_status_id: lastBadTagId
                                 );
 
-                                Console.WriteLine("Reply to tweet from:" + r.User.ScreenName);
+                                Console.WriteLine("Reply to tweet from:" + r.User.ScreenName + " TweetId: " + r.Id);
 
                                 //break;
                             }

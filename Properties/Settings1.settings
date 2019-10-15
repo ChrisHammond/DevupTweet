@@ -24,16 +24,16 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="lastTweetId" Type="System.Int64" Scope="User">
-      <Value Profile="(Default)">0</Value>
+      <Value Profile="(Default)">1184117353510064128</Value>
     </Setting>
     <Setting Name="lastRetweetTime" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="lastRetweetId" Type="System.Int64" Scope="User">
-      <Value Profile="(Default)">0</Value>
+      <Value Profile="(Default)">1184117353510064128</Value>
     </Setting>
     <Setting Name="lastBadTagId" Type="System.Int64" Scope="User">
-      <Value Profile="(Default)">0</Value>
+      <Value Profile="(Default)">1184117353510064128</Value>
     </Setting>
   </Settings>
 </SettingsFile>
