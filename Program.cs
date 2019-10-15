@@ -57,7 +57,7 @@ namespace DevUpTweet
                 string pin = Console.ReadLine();
 
                 tokens = session.GetTokens(pin);
-                //save the token values to our settings
+                //save the token values to our settings, when saved properly we don't have to reauthorize the app when starting it up again.
                 Settings1.Default["consumerKey"] = tokens.ConsumerKey;
                 Settings1.Default["consumerSecret"] = tokens.ConsumerSecret;
                 Settings1.Default["accessToken"] = tokens.AccessToken;
@@ -108,8 +108,9 @@ namespace DevUpTweet
                             , "@{0} Enjoy St. Charles! #DevUp2019"
                             , "@{0} Do you remember when it was called Day of .Net? How about Days? #DevUp2019"
                             , "@{0} Don't forget about the new entrance in parking garage on Level 3 #DevUp2019"
-                            , "@{0} The Keynote on Tuesday is at 8am #DevUp2019"
+                            //, "@{0} The Keynote on Tuesday is at 8am #DevUp2019"
                             , "@{0} The closing keynote on Wednesday is at 3:45pm #DevUp2019"
+                            , "@{0} what did you think of @donasarkar's keynote?"
                             , "@{0} Have fun!"
                 };
 
@@ -123,6 +124,10 @@ namespace DevUpTweet
                             //Check to make sure we don't reply to a previously replied tweet, or to ourselves
                             if (r.Id != lastTweetId && r.User.ScreenName.ToLower() != "devupbot" && r.RetweetedStatus == null)
                             {
+
+                                index = new Random().Next(listYes.Count);
+                                status = listYes[index]; //randomize what text to use as a reply
+                                
                                 lastTweetId = r.Id;
                                 Settings1.Default["lastTweetId"] = lastTweetId;
                                 Settings1.Default.Save();
@@ -169,8 +174,6 @@ namespace DevUpTweet
                         Settings1.Default["lastRetweetTime"] = lastRetweetTime.ToString();
                         Settings1.Default.Save();
                         Console.WriteLine("Last retweet time: " + lastRetweetTime.ToString());
-                        
-
                     }
                 }
                 catch (Exception ex)
