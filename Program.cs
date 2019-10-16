@@ -101,10 +101,10 @@ namespace DevUpTweet
                     {
                         //list of strings to add to the replies
                         var listYes = new List<string> { "@{0} Enjoy the conference", "@{0} Will you have fun?"
-                            , "@{0} What do you think you will like best?"
-                            , "@{0} Is this your first #DevUp2019?"
+                            //, "@{0} What do you think you will like best?"
+                            //, "@{0} Is this your first #DevUp2019?"
                             , "@{0} Are you excited about any particular session #DevUp2019?"
-                            , "@{0} Don't have too much fun! #DevUp2019?"
+                           // , "@{0} Don't have too much fun! #DevUp2019?"
                             , "@{0} Are you going to see @christoc's sessions? #DevUp2019"
                             , "@{0} Are you #ReadyDeveloperOne?"
                             , "@{0} Enjoy St. Charles! #DevUp2019"
@@ -114,9 +114,11 @@ namespace DevUpTweet
                             , "@{0} The closing keynote on Wednesday is at 3:45pm #DevUp2019"
                             , "@{0} what did you think of @donasarkar's keynote?"
                             , "@{0} you can learn more about me at 1pm Wednesday in the Success room #FTW #DevUp2019"
-
-                            , "@{0} I've got less than 2 days left before I'm shut down!"
+                            , "@{0} any particular session you recommend?"
+                            , "@{0} did you learn anything life changing yet?"
+                            , "@{0} I've got less than 1 day before I'm shut down!"
                             , "@{0} Have fun!"
+                            , "@{0} Today's the final day, enjoy!"
                 };
 
                         int index = new Random().Next(listYes.Count);
