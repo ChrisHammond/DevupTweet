@@ -109,7 +109,7 @@ namespace DevUpTweet.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1184117353510064128")]
+        [global::System.Configuration.DefaultSettingValueAttribute("1184540125772079106")]
         public long lastTweetId {
             get {
                 return ((long)(this["lastTweetId"]));
@@ -133,7 +133,7 @@ namespace DevUpTweet.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1184117353510064128")]
+        [global::System.Configuration.DefaultSettingValueAttribute("1184540125772079106")]
         public long lastRetweetId {
             get {
                 return ((long)(this["lastRetweetId"]));
@@ -145,7 +145,7 @@ namespace DevUpTweet.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1184117353510064128")]
+        [global::System.Configuration.DefaultSettingValueAttribute("1184540125772079106")]
         public long lastBadTagId {
             get {
                 return ((long)(this["lastBadTagId"]));

@@ -15,7 +15,7 @@ namespace DevUpTweet
 
 
             //uncomment this to clear user settings and reauthorize
-            //Properties.Settings1.Default.Reset();
+            Properties.Settings1.Default.Reset();
 
             //load a the twitter application settings to be used later, these come from a user settings file, and will be blank by default
             var consumerKey = Settings1.Default["consumerKey"].ToString();
@@ -52,7 +52,7 @@ namespace DevUpTweet
                 //If we don't have these settings populated already we need to go authenticate the user with twitter and get a pin code
                 //need to authenticate, and then get a pin code from Twitter to store/use
                 System.Diagnostics.Process.Start(session.AuthorizeUri.AbsoluteUri); //this will open up a URL for the user to login/authorize the app
-                Console.WriteLine("@DevUpBot Enter the Pin code from Twitter");
+                Console.WriteLine("To Activate @DevUpBot Enter the Pin code from Twitter");
                 string pin = Console.ReadLine();
 
                 tokens = session.GetTokens(pin);
@@ -69,7 +69,8 @@ namespace DevUpTweet
             //now let's look at getting the bot doing something
             Console.WriteLine("Tweet History:");
 
-            //we don't want to retweet or reply to tweets that we've already touched, so we do that by keeping track of our last time
+            //we don't want to retweet or reply to tweets that we've already touched,
+            //so we do that by keeping track of our last time, in addition to later storing last tweet id
             DateTime lastTweetTime = DateTime.Now.AddMinutes(-5);
             DateTime lastRetweetTime = DateTime.Now.AddMinutes(-5);
 
@@ -91,7 +92,8 @@ namespace DevUpTweet
             long lastBadTagId = (long)Settings1.Default["lastBadTagId"]; // 921273009989672960;
 
 
-            //This is where you need to start being careful of how often you do things, don't abuse! This thing will run until you kill the console app with Control-C
+            //This is where you need to start being careful of how often you do things, don't abuse!
+            //This thing will run until you kill the console app with Control-C
             do
             {
                 try
@@ -100,32 +102,47 @@ namespace DevUpTweet
                     if (DateTime.Now >= lastTweetTime.AddMinutes(1))
                     {
                         //list of strings to add to the replies
-                        var listYes = new List<string> { "@{0} Enjoy the conference", "@{0} Will you have fun?"
-                            //, "@{0} What do you think you will like best?"
-                            //, "@{0} Is this your first #DevUp2019?"
-                            , "@{0} Are you excited about any particular session #DevUp2019?"
-                           // , "@{0} Don't have too much fun! #DevUp2019?"
-                            , "@{0} Are you going to see @christoc's sessions? #DevUp2019"
-                            , "@{0} Are you #ReadyDeveloperOne?"
-                            , "@{0} Enjoy St. Charles! #DevUp2019"
-                            , "@{0} Do you remember when it was called Day of .Net? How about Days? #DevUp2019"
-                            , "@{0} Don't forget about the new entrance in parking garage on Level 3 #DevUp2019"
-                            //, "@{0} The Keynote on Tuesday is at 8am #DevUp2019"
-                            , "@{0} The closing keynote on Wednesday is at 3:45pm #DevUp2019"
-                            , "@{0} what did you think of @donasarkar's keynote?"
-                            , "@{0} you can learn more about me at 1pm Wednesday in the Success room #FTW #DevUp2019"
-                            , "@{0} any particular session you recommend?"
-                            , "@{0} did you learn anything life changing yet?"
-                            , "@{0} I've got less than 1 day before I'm shut down!"
-                            , "@{0} Have fun!"
-                            , "@{0} Today's the final day, enjoy!"
+                        var listYes = new List<string> { 
+                            
+                            "@{0} ProTip for exiting the garage: It is hard. Go the wrong way to get to the EXIT 3 rows from the west side" +
+                            ", or go all the way west and cut across then back down the proper direction."
+                            //, "@{0} Are you going to see @christoc's sessions? #DevUp2019"
+                            //, "@{0} The closing keynote on Wednesday is at 3:45pm #DevUp2019"
+                            //, "@{0} what did you think of @donasarkar's keynote?"
+                            //, "@{0} you can learn more about me at 1pm Wednesday in the Success room #FTW #DevUp2019"
+                            //, "@{0} any particular session you recommend?"
+                            //, "@{0} did you learn anything life changing yet?"
+                            , "@{0} I've got less than 12 hours before I'm shut down!"
+                            , "@{0} Hope you had a great time!"
+                            , "@{0} Will we see you here next year?"
+                           
+                            ///, "@{0} Today's the final day, enjoy!"
+                            
+                            //"@{0} Enjoy the conference", "@{0} Will you have fun?"
+                            // , "@{0} What do you think you will like best?"
+                            // , "@{0} Is this your first #DevUp2019?"
+                            // , "@{0} Don't have too much fun! #DevUp2019?"
+                            // , "@{0} The Keynote on Tuesday is at 8am #DevUp2019"
+                            // , "@{0} Are you excited about any particular session #DevUp2019?"
+                            // , "@{0} Enjoy St. Charles! #DevUp2019"
+                            // , "@{0} Have fun!"
+                            // , "@{0} Are you #ReadyDeveloperOne?"
+                            // , "@{0} Do you remember when it was called Day of .Net? How about Days? #DevUp2019"
+                            // , "@{0} Don't forget about the new entrance in parking garage on Level 3 #DevUp2019"
+
                 };
 
+                        //randomize what text to use as a reply
                         int index = new Random().Next(listYes.Count);
-                        var status = listYes[index]; //randomize what text to use as a reply
+                        var status = listYes[index]; 
 
                         //look for tweets with devup2019 in the body, but ignore any that have some bad keywords in them
-                        var res = tokens.Search.Tweets("\"devup2019\" -kill -death -suicide -shoot -stab -kms -die -jump", null, null, null, null, null, null, lastTweetId, null, null, null, null);
+                        var res = tokens.Search.Tweets("\"devup2019\" -kill -death -suicide -shoot -stab -kms -die -jump"
+                            , null, null, null, null
+                            , null, null, lastTweetId
+                            , null, null
+                            , null
+                            , null);
                         foreach (Status r in res.OrderBy(x => x.Id))
                         {
                             //Check to make sure we don't reply to a previously replied tweet, or to ourselves
@@ -146,12 +163,25 @@ namespace DevUpTweet
 
                                 Console.WriteLine("Reply to tweet from:" + r.User.ScreenName);
 
-                                //break;
+                             //   break;
                             }
                         }
 
-                        //call our the wrong hashtag
-                        var resTag = tokens.Search.Tweets("\"#devupconf\" -kill -death -suicide -shoot -stab -kms -die -jump", null, null, null, null, null, null, lastBadTagId, null, null, null, null);
+                        //store the last tweet time so we don't reply to that again in the future
+                        lastTweetTime = DateTime.Now;
+                        Settings1.Default["lastTweetTime"] = lastTweetTime.ToString();
+                        Settings1.Default.Save();
+                        Console.WriteLine("Last reply time: " + lastTweetTime);
+
+                        #region BadHashtag
+
+                        //call out the wrong hashtag
+                        var resTag = tokens.Search.Tweets("\"#devupconf\" " +
+                                                          "-kill -death -suicide -shoot -stab -kms -die -jump"
+                            , null, null, null, null, null, 
+                            null, lastBadTagId
+                            
+                            , null, null, null, null);
                         foreach (Status r in resTag.OrderBy(x => x.Id))
                         {
                             //Check to make sure we don't reply to a previously replied tweet, or to ourselves
@@ -172,12 +202,10 @@ namespace DevUpTweet
                                 //break;
                             }
                         }
+                        #endregion
 
-                        //store the last tweet time so we don't reply to that again in the future
-                        lastTweetTime = DateTime.Now;
-                        Settings1.Default["lastTweetTime"] = lastTweetTime.ToString();
-                        Settings1.Default.Save();
-                        Console.WriteLine("Last reply time: " + lastTweetTime);
+                        #region Retweet code
+
 
                         //let's look at retweeting #DevUp2019 posts
                         res = tokens.Search.Tweets("\"devup2019\" -kill -death -suicide -shoot -stab -kms -die -jump", null, null, null, null, null, null, lastRetweetId, null, null, null, null);
@@ -199,11 +227,12 @@ namespace DevUpTweet
                             }
                         }
 
-
                         lastRetweetTime = DateTime.Now;
                         Settings1.Default["lastRetweetTime"] = lastRetweetTime.ToString();
                         Settings1.Default.Save();
                         Console.WriteLine("Last retweet time: " + lastRetweetTime);
+
+                        #endregion
                     }
                 }
                 catch (Exception ex)
